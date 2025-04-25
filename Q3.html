@@ -1,0 +1,356 @@
+<!-- use =>           https://aladhan.com/prayer-times-api                  -->
+<!-- المتطلبات في الصوره بأسم Q3 -->
+
+<!-- 
+ متطلبات التحدي:
+ إظهار مسميات الأوقات (السنّة) بتوقيتاتها:
+ 
+ مثل: الشروق - الفجر - الظهر - العصر - المغرب - العشاء.
+ 
+ حسب المدينة المختارة.
+ 
+ توفير إمكانية تغيير المدينة:
+ 
+ تحديث الأوقات تلقائيًا بمجرد تحديد مدينة من قائمة المدن.
+ 
+ إظهار تاريخ اليوم:
+ 
+ بحيث تظهر المواقيت بناءً عليه.
+ 
+ يفضّل استخدام مكتبة axios:
+ 
+ لعمل الطلبات (API Requests).
+ 
+ تحميلها باستخدام npm.
+ 
+ التصميم:
+ 
+ قم ببناء التصميم الذي تراه مناسبًا.
+ 
+ استخدم إبداعك لإخراج التطبيق بأفضل شكل ممكن.
+ 
+  -->
+
+<!--  الله المعين    -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بسم الله</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Fredoka:wght@300..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <link href="./all.css" rel="stylesheet" />
+
+    <script src="./node_modules/axios/dist/axios.js"></script>
+  </head>
+  <style>
+    /* All time */
+    /*    .card , .icon, .time, .name       */
+
+    /* title , address*/
+    /* .title, .city*/
+
+    /* nextTime  currentTime */
+    :root {
+      --color-main: #f8f8f8;
+      --color-continer: #faebcd;
+      --color-header: #f7c873;
+      --color-icon: #f7c873;
+      --color-text: #434343;
+    }
+    body {
+      background-color:var(--color-main);
+      /* background-color: gray; */
+
+      font-family: "Fredoka", sans-serif;
+    }
+    .time,
+    .name,
+    .title,
+    .city,
+    .nextTime,
+    .currentTime {
+      color: var(--color-text);
+    }
+    .nextTime {
+      color: var(--color-icon);
+    }
+    .icon {
+      color: var(--color-icon);
+    }
+    .card {
+      /* background-color:var(--color-continer); */
+      border: 1px solid var(--color-icon);
+    }
+    #Address{
+      cursor:pointer;
+    }
+    dialog {
+      border: none;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      background-color:var(--color-continer);
+
+
+      position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    }
+  
+    dialog::backdrop {
+        backdrop-filter: blur(2px);
+        background: rgba(0, 0, 0, 0.4);
+    }
+  
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+  </style>
+  <body class="p-10">
+    <dialog class=" " id="myDialog">
+      <form class="flex flex-col justify-center items-center p-3 gap-5">
+
+        <h3 class="text-3xl" >ادخل الموقع </h3>
+        <input id="locationInput" class="bg-gray-200 w-full h-10 raunded items-center" placeholder="ادخال الموقع" type="text"></div>
+        <!-- <p class="text-2xl">هل ترغب استخدام الموقع؟</p> -->
+        <input type="checkbox" class="flex flex-row" id="GPS"> تحديد الموقع تلقائيا</input>
+        <div class="actions items-center m-3  flex flex-row justify-center items-center  " >
+          <button class="text-2xl" onclick="document.getElementById('myDialog').close()">إلغاء</button>
+          <button class="text-2xl" id="ok">تأكيد</button>
+        </div>
+  
+      </form>
+
+
+    </dialog>
+    
+    <!-------------------------------------- Title --------------------------------------------------->
+
+    <nav class="flex justify-center items-center h-60 sm:h-70">
+      <span class="title text-5xl sm:text-8xl">اوقات الصلاه</span>
+      <!-- خط كبير -->
+    </nav>
+    <main>
+      <!-------------------------------------- Address  --------------------------------------------------->
+
+      <section
+        class="flex flex-col justify-center items-center h-60 text-4xl gap-5 sm:gap-10 sm:text-7xl"
+      >
+        <div id="Address">
+          <i
+            class="fa-solid fa-location-dot icon items-center text-3xl sm:text-6xl"
+            
+          ></i>
+          <!-- الخط اصغر من العنوان -->
+          <span class="city" id="location_add">location</span>
+        </div>
+        <!------------------------ current Time , NexTime --------------------------->
+
+        <div class="flex flex-col gap-2 items-center sm:gap-5">
+          <!-- الوفت الحالي  -->
+          <!-- خط كبير  -->
+          <span class="currentTime text-2xl sm:text-5xl" id="CurrentTime">
+            CurrentTime</span
+          >
+          <!-- وفت اقرب صلاه  -->
+          <!-- خط وسط -->
+          <span class="nextTime text-lg sm: text-3xl" id="NextPrayer"
+            >NextPrayer</span
+          >
+        </div>
+      </section>
+
+      <!-------------------------------------- All Times --------------------------------------------------->
+      <section
+        class="flex flex-col sm:flex-row gap-3 sm:gap-15 justify-center items-center sm:mt-20"
+        id="card"
+        >
+        <!-- 6 card here -->
+
+        <!-- <div class="card gap-5 sm:gap-0 w-full h-10 sm:w-40 sm:h-40 flex flex-row sm:flex-col justify-between sm:justify-between  items-center rounded-xl p-5 ">
+          <i class="fa-regular fa-moon icon text-3xl  "></i>         
+          <div class="flex flex-row-reverse sm:flex-col-reverse items-center w-full  justify-between sm:justify-center sm:gap-2">
+            <span class="time text-lg " id="PrayerTime" >PrayerTime</span>
+            <span class="name text-2xl" id="PrayerName" >PrayerName </span>
+          </div>
+        </div> -->
+
+        <!-- 
+        الفجر : <i class="fa-regular fa-moon"></i>
+        الشروق : <i class="fa-solid fa-cloud-sun"></i>
+        الظهر : <i class="fa-regular fa-sun"></i>
+        العصر : <i class="fa-solid fa-cloud"></i>
+        الغروب : <i class="fa-solid fa-cloud-moon"></i>
+        العشاء : <i class="fa-solid fa-mosque"></i>
+        الكعبه : <i class="fa-solid fa-kaaba"></i>
+ -->
+      </section>
+    </main>
+  </body>
+  <script>
+    const location_add = document.getElementById("location_add");
+    const currentTime = document.getElementById("CurrentTime");
+    const prayerTime = document.getElementById("PrayerTime");
+    const prayerName = document.getElementById("PrayerName");
+    const nextPrayer = document.getElementById("NextPrayer");
+    const Address = document.getElementById("Address");
+    const card=document.getElementById("card")
+    const myDialog=document.getElementById('myDialog')
+
+    // new location 
+    const locationInput = document.getElementById("locationInput");
+    const GPS = document.getElementById("GPS");
+    const ok = document.getElementById("ok");
+    const GPSAtive=false;
+    var newLocation;
+
+
+    // defulet data 
+    var address = "EGYPT";
+    var date = "01-01-2025";
+    
+
+
+    
+
+    location_add.innerHTML=address;
+
+    const icons={
+      Fajr: 'fa-regular fa-moon',
+        Sunrise: 'fa-solid fa-cloud-sun',
+        Dhuhr: 'fa-regular fa-sun',
+        Asr: 'fa-solid fa-cloud',
+        Maghrib: 'fa-solid fa-cloud-moon',
+        Isha: 'fa-solid fa-mosque',
+    }
+
+    // function getaddress(){
+    //   Address.addEventListener( "click",(e)=>{
+
+    //     // open dialon with showModal
+    //     myDialog.showModal();
+
+    //     //get data from user
+    //     // newLocation=userLOcion.value;
+    
+    //     ok.addEventListener("click",(e)=>{
+    //          newLocation=userLOcion.value;
+    
+    //          myDialog.close();
+    //          return console.log(newLocation)
+    //       });
+
+    //       if(newLocation){
+    //         console.log(newLocation)
+    //         address=newLocation;
+    //         console.log(address)
+    //       }
+
+    //   return ;
+    //   })
+    // }
+    
+
+    function getaddress() {
+  Address.addEventListener("click", () => {
+    myDialog.showModal();
+  });
+
+  ok.addEventListener("click", (e) => {
+    e.preventDefault(); // عشان ما يعيد تحميل الصفحة
+    newLocation = locationInput.value;
+
+    if (newLocation.trim() !== "") {
+      address = newLocation;
+      location_add.innerHTML = address;
+      const today = new Date();
+      const dateString = `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}-${today.getFullYear()}`;
+      
+      getALLTimes(dateString, address);
+      getNextTime(dateString, address);
+    }
+
+    myDialog.close();
+  });
+}
+
+
+
+    
+    function getCurrentTime(){
+      var Time=new Date();
+      console.log(Time.getHours())
+      console.log(Time.getMinutes())
+      return Time.getHours()+":"+Time.getMinutes();
+
+    }
+    function getALLTimes(date, address) {
+      return axios
+        .get(
+          `https://api.aladhan.com/v1/timingsByAddress/${date}?address=${address}`
+        )
+        .then((response) => response.data)
+        .then((response) => response.data.timings)
+        .then((response) => {
+          console.log(typeof response);
+          return (card.innerHTML = Object.entries(response).map(
+            ([key, value]) => {
+              switch (key) {
+                case "Fajr":
+                case "Sunrise":
+                case "Dhuhr":
+                case "Asr":
+                case "Maghrib":
+                case "Isha":
+                  return `
+                         <div class="card gap-5 sm:gap-0 w-full h-10 sm:w-40 sm:h-40 flex flex-row sm:flex-col justify-between sm:justify-between  items-center rounded-xl p-5 ">
+                            <i class="${icons[key]} icon text-3xl  "></i>         
+                            <div class="flex flex-row-reverse sm:flex-col-reverse items-center w-full  justify-between sm:justify-center sm:gap-2">
+                              <span class="time text-lg " id="PrayerTime" >${value}</span>
+                              <span class="name text-2xl" id="PrayerName" >${key}</span>
+                            </div>
+                          </div>
+                          `
+                  break;
+              }
+            }
+          ).join(""));
+        });
+    }
+    function getNextTime(date, address) {
+      return axios
+        .get(
+          `https://api.aladhan.com/v1/nextPrayerByAddress/${date}?address=${address}`
+        )
+        .then((response) => response.data)
+        .then((response) => response.data.timings)
+        .then((response) => {
+          console.log(typeof response);
+          return (nextPrayer.innerHTML = Object.entries(response).map(
+            ([key, value]) => key + " : " + value
+          ));
+        });
+    }
+
+    getALLTimes(date, address);
+    getNextTime(date,address);
+    currentTime.innerHTML=getCurrentTime()
+    getaddress();
+
+    
+  </script>
+</html>
